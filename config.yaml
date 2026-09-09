@@ -1,0 +1,40 @@
+# Sample configuration for mqtt-pg-bridge. Matches docker-compose.yml and docker/init.sql.
+# String values may reference environment variables as ${NAME} or ${NAME:-default}.
+
+mqtt:
+  host: localhost
+  port: 1883
+  username: null
+  password: null
+  client_id: mqtt-pg-bridge
+  qos: 1
+
+postgres:
+  dsn: postgresql://bridge:${PG_PASSWORD:-bridge}@localhost:5432/telemetry
+  pool_size: 4
+
+spool:
+  # SQLite file that holds messages while PostgreSQL is unreachable, plus dead letters.
+  path: ./spool.sqlite
+
+batching:
+  batch_size: 500        # rows per INSERT transaction
+  flush_interval: 2.0    # seconds a partial batch waits before it is written anyway
+  queue_size: 10000      # in-memory messages before the MQTT client is paused
+
+retry:
+  max_attempts: 3        # live-path write attempts before a batch is spooled
+  initial_delay: 0.5     # seconds; doubles after every failure, with jitter
+  max_delay: 30.0
+
+mappings:
+  # {name} captures one topic level into a column of the same name.
+  # Payload fields listed under `fields` become columns; missing fields are NULL.
+  # Every row also gets a `received_at` timestamptz column (rename or set to null).
+  - topic: plant/{site}/{machine}/energy
+    table: energy_readings
+    fields: [kwh, voltage_v, current_a, power_factor]
+
+  # Without `fields`, every top-level key in the JSON object becomes a column.
+  - topic: plant/{site}/{machine}/status
+    table: machine_status
