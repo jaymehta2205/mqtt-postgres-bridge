@@ -1,4 +1,4 @@
-# mqtt-pg-bridge
+# mqtt-postgres-bridge
 
 Batch MQTT JSON telemetry into PostgreSQL, with a SQLite spool that survives database outages.
 
@@ -36,7 +36,8 @@ failure handling is the part I spent the most time on.
 
 ## Quick start
 
-Requires Python 3.11 or newer. The `docker-compose.yml` starts Mosquitto and PostgreSQL with the
+Requires Python 3.11 or newer. The package and its CLI are both called `mqtt-pg-bridge`. The
+`docker-compose.yml` starts Mosquitto and PostgreSQL with the
 tables from `docker/init.sql`, which match the mappings in `config.yaml`.
 
 ```bash
